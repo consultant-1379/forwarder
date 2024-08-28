@@ -1,0 +1,20 @@
+# Default values for forwarder.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+Image: "armdocker.rnd.ericsson.se/aia_releases/aia/asr-forwarder"
+ImageTag: "latest"
+forwardPort: 21000
+forwardPort_Nodeport: 31109
+application_Id: "fwdr"
+application_Home: "/ericsson/fwdr"
+flow_Directory: "/ericsson/fwdr/flow"
+instrumentation_On: "true"
+instrumentation_Method: "CSV"
+instrumentation_File_Location: "/ericsson/fwdr/reporting"
+logback_File: "/ericsson/fwdr/etc/logback.xml"
+log_Dir: "/ericsson/fwdr/log"
+heap: "1500M"
+heap_Max: "1500M"
+ini_file_location: "/ericsson/tor/data/asrl_forwarder_config"
+ini_file_name: "fwdr.ini"

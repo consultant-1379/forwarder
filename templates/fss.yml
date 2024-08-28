@@ -1,0 +1,67 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+    name: "{{ printf "fw-%s" .Release.Name | trunc 24 }}"
+    annotations:
+      helm.sh/created: {{.Release.Time.Seconds | quote }}
+    labels:
+      heritage: {{.Release.Service | quote }}
+      release: {{.Release.Name | quote }}
+      chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+      component: "{{ printf "fw-%s" .Release.Name  | trunc 24  }}"
+spec:
+  serviceName: "{{ printf "fw-%s-0" .Release.Name | trunc 24 }}"
+  replicas: {{.Values.replicaCount}}
+  template:
+    metadata:
+      labels:
+        component: "{{ printf "fw-%s-0" .Release.Name | trunc 24 }}"
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: forwarder
+        image: "{{.Values.Image}}:{{ .Values.ImageTag }}"
+        env:
+        - name: FORWARDER_CONNECTION_URL
+          value: "{{ printf "sr-%s:8081" .Release.Name }}"
+        - name: FORWARDER_HOST_NAME
+          value: "{{ printf "fw-%s-0.schema.default.svc.cluster.local" .Release.Name | trunc 24 }}"
+        - name: FORWARDER_LISTENERS
+          value: {{ printf "http://0.0.0.0:%s" .Values.Port }}
+        - name: APPLICATION_ID
+          value: {{ .Values.application_Id | quote }}
+        - name: APPLICATION_HOME
+          value: {{ .Values.application_Home | quote }}
+        - name: FLOW_DIRECTORY
+          value: {{.Values.flow_Directory | quote }}
+        - name: INSTRUMENTATION_ON
+          value: {{ .Values.instrumentation_On | quote }}
+        - name: INSTRUMENTATION_METHOD
+          value: {{ .Values.instrumentation_Method | quote }}
+        - name: INSTRUMENTATION_FILE_LOCATION
+          value: {{ .Values.instrumentation_File_Location | quote }}
+        - name: LOGBACK_FILE
+          value: {{ .Values.logback_File | quote }}
+        - name: LOG_DIR
+          value: {{ .Values.log_Dir | quote }}
+        - name: MAX_HEAP_SIZE_GB
+          value: {{ .Values.heap_Max | quote }}
+        - name: INITIAL_HEAP_SIZE_GB
+          value: {{ .Values.heap | quote}}
+        - name: INI_FILE_LOCATION
+          value: {{ .Values.ini_file_location | quote }} 
+        - name: INI_FILE_NAME
+          value: {{ .Values.ini_file_name | quote }}
+        - name: FORWARD_PORT
+          value: {{ .Values.forwardPort }}
+        ports:
+        - containerPort: {{.Values.forwardPort }}
+          name: forwardport
+        volumeMounts:
+        - name: nfs
+          mountPath: /ericsson/fwdr/ipl
+      volumes:
+      - name: nfs
+        persistentVolumeClaim:
+          claimName: nfs
+
